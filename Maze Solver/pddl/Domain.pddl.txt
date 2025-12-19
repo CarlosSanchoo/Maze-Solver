@@ -1,0 +1,86 @@
+(define (domain Laberinto)
+
+    (:requirements
+        :strips
+        :typing
+    )
+
+    (:types
+        celda
+        agent
+        clau
+        porta
+    )
+
+    (:constants
+        
+    )
+
+    (:predicates
+        
+        (en ?a - agent ?c - celda)  ;El agente esta en una celda
+        (adjacent ?c1 - celda ?c2 - celda)  ;Dos celdas son adyacentes
+        (clau-en ?k - clau ?c - celda);Una celda contiene una llave
+        (te ?a - agent ?k - clau);El agente tiene una clave
+        (puerta-llave ?p - porta ?k - clau);puerta asociada a una llave
+        (es-porta ?c - celda);Indica si la celda es una puerta
+        (es-paret ?c - celda);Indica si la celda es una pared
+        (oberta ?c - porta);Indica si esta abierta la celda (puerta)
+        
+    )
+
+
+    (:action MoureAEspai
+        :parameters (?a - agent ?desde - celda ?hacia - celda)
+        :precondition (and 
+            (en ?a ?desde)
+            (or (adjacent ?desde ?hacia) (adjacent ?hacia ?desde))
+            (not (es-paret ?hacia))
+            (not (es-porta ?hacia))
+            (forall (?b - agent) (not (en ?b ?hacia)))
+        )
+        :effect (and
+            (not (en ?a ?desde))
+            (en ?a ?hacia)
+        )
+    )
+    (:action MoureAClau
+        :parameters(?a - agent ?desde - celda ?hacia - celda ?k - clau ?p - porta)
+        :precondition(and
+            (en ?a ?desde)
+            (not (es-porta ?hacia))
+            (not (es-paret ?hacia))
+            (or (adjacent ?desde ?hacia) (adjacent ?hacia ?desde))
+            (clau-en ?k ?hacia)
+            (puerta-llave ?p ?k)
+            (not (oberta ?p))
+            (forall (?b - agent) (not (en ?b ?hacia)))
+        )
+        :effect(and
+            (not (en ?a ?desde))
+            (en ?a ?hacia)
+            (not (clau-en ?k ?hacia))
+            (forall (?b - agent) (te ?b ?k))
+            (oberta ?p)
+        )
+    )
+    (:action MoureAPorta
+        :parameters (?a - agent ?desde - celda ?hacia - celda ?p - porta ?k - clau)
+        :precondition (and
+            (en ?a ?desde)
+            (or (adjacent ?desde ?hacia) (adjacent ?hacia ?desde))
+            (not (es-paret ?hacia))
+            (es-porta ?hacia)
+            (puerta-llave ?p ?k)
+            (oberta ?p)
+            (forall (?b - agent) (not (en ?b ?hacia)))
+        )
+        :effect (and
+            (not (en ?a ?desde))
+            (en ?a ?hacia)
+        )
+    )
+    
+)
+
+
